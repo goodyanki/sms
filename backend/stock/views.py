@@ -3,6 +3,9 @@ from django.shortcuts import render
 # Create your views here.
 import yfinance as yf
 from django.http import JsonResponse
+from django.contrib.auth.models import User
+from rest_framework.decorators import api_view
+
 
 
 #documentation: https://yfinance-python.org/index.html
@@ -25,4 +28,13 @@ def get_stock_info(request):
         'daily_change': f"{daily_change}%",
     }
 
+
     return JsonResponse(stockInfo)
+
+@api_view(['POST'])
+def register_user(request):
+    username=request.data.get('username')
+    password=request.data.get('password')
+    email=request.data.get('email')
+
+
