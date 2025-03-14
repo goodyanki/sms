@@ -53,22 +53,22 @@ const App: React.FC = () => {
               {
                 key: "1",
                 icon: <UserOutlined />,
-                label: <Link to="/">Overview</Link>,
+                label: <Link to="/dashboard">Overview</Link>,
               },
               {
                 key: "2",
                 icon: <VideoCameraOutlined />,
-                label: <Link to="/watch-list">Watch List</Link>,
+                label: <Link to="/dashboard/watch-list">Watch List</Link>,
               },
               {
                 key: "3",
                 icon: <UploadOutlined />,
-                label: <Link to="/technical-index">Technical Index</Link>,
+                label: <Link to="/dashboard/technical-index">Technical Index</Link>,
               },
               {
                 key: "4",
                 icon: <InboxOutlined />,
-                label: <Link to="/system-alert">System Alert</Link>,
+                label: <Link to="/dashboard/system-alert">System Alert</Link>,
               },
             ]}
           />

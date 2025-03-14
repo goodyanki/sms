@@ -7,8 +7,8 @@ from django.contrib.auth.models import User
 from rest_framework.decorators import api_view
 
 
-
 #documentation: https://yfinance-python.org/index.html
+
 
 def get_stock_info(request):
     symbol = request.GET.get('symbol', 'NVDA')
@@ -28,13 +28,36 @@ def get_stock_info(request):
         'daily_change': f"{daily_change}%",
     }
 
-
     return JsonResponse(stockInfo)
+
 
 @api_view(['POST'])
 def register_user(request):
-    username=request.data.get('username')
-    password=request.data.get('password')
-    email=request.data.get('email')
+    username = request.data.get('username')
+    password = request.data.get('password')
+    email = request.data.get('email')
+
+    if User.objects.filter(email=email).exists():
+        return JsonResponse({'error': 'User already exits'})
+    elif User.objects.filter(username=username).exists():
+        return JsonResponse({'error': 'Username already exits'})
+    else:
+        User.objects.create_user(username=username, password=password, email=email)
+        return JsonResponse({'message': 'User created successfully'})
+
+
+@api_view(['POST'])
+def login(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    if User.objects.filter(username=username).exists():
+        user = User.objects.get(username=username)
+        if user.check_password(password):
+            return JsonResponse(
+                {'message': 'Login successful','username': user.username, 'email': user.email, 'isLogin': "11"},
+            )
+        else:
+            return JsonResponse({'error': 'Invalid credentials'})
 
 

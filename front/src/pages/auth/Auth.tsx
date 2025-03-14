@@ -1,10 +1,39 @@
 import React from "react";
-import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, Flex, Row, Col } from "antd";
+import {useNavigate} from "react-router-dom";
 
 const App: React.FC = () => {
-  const onFinish = (values: any) => {
+  const navigate = useNavigate();
+  const onFinish = async (values: any) => {
     console.log("Received values of form: ", values);
+    const response = await fetch("http://localhost:8000/api/login/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: values.username,
+        password: values.password,
+      }),
+    });
+
+    const result = await response.json();
+    if(response.ok){
+
+        localStorage.setItem("isLogin", result.isLogin);
+
+
+        console.log("Success:", result)
+        setTimeout(() => {
+        navigate("/dashboard");
+      }, 1500);
+    }
+    else{
+        console.log("Error:", result)
+    }
+
+
   };
 
   return (
@@ -45,7 +74,7 @@ const App: React.FC = () => {
             <Button block type="primary" htmlType="submit">
               Log in
             </Button>
-            or <a href="">Register now!</a>
+            or <a href="/register">Register now!</a>
           </Form.Item>
         </Form>
       </Col>

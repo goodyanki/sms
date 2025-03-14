@@ -1,10 +1,44 @@
 import React from "react";
 import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Form, Input, Flex, Row, Col } from "antd";
+import {Button, Checkbox, Form, Input, Flex, Row, Col} from "antd";
+import {useNavigate} from "react-router-dom";
+
 
 const App: React.FC = () => {
-  const onFinish = (values: any) => {
+  const navigate = useNavigate();
+  const onFinish = async (values: any) => {
     console.log("Received values of form: ", values);
+
+    const response = await fetch("http://localhost:8000/api/register/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: values.username,
+        password: values.password,
+        email: values.email,
+      }),
+
+    });
+
+
+    const data = await response.json();
+    if (response.ok) {
+      if (data.error) {
+        console.log("Error:", data.error);
+      }
+      console.log("Success:");
+      setTimeout(() => {
+        navigate("/auth");
+      }, 1500);
+    }
+
+      else{
+        console.log("Error:", data);
+    }
+
+
   };
 
   return (
@@ -34,7 +68,7 @@ const App: React.FC = () => {
             />
           </Form.Item>
           <Form.Item
-            name="e-mail"
+            name="email"
             rules={[
               { required: true, message: "Please input your Email Address!" },
             ]}
