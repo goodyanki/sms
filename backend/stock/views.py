@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from .models import Watchlist, Watchliststock
 
 # Create your views here.
 import yfinance as yf
@@ -55,9 +56,26 @@ def login(request):
         user = User.objects.get(username=username)
         if user.check_password(password):
             return JsonResponse(
-                {'message': 'Login successful','username': user.username, 'email': user.email, 'isLogin': "11"},
+                {'message': 'Login successful','username': user.username, 'email': user.email, 'isLogin': "11", 'user_id':user.id},
             )
         else:
             return JsonResponse({'error': 'Invalid credentials'})
 
+
+@api_view(['POST'])
+def add_to_watchlist(request):
+    symbol = request.data.get('symbol')
+    user_id = request.data.get('user_id')
+
+    watchlist, watchlist_created = Watchlist.objects.get_or_create(user_id=user_id)
+    stock, symbol_created  = Watchliststock.objects.get_or_create(watchlist = watchlist, symbol = symbol)
+
+    if not symbol_created:
+        return JsonResponse({"result": "Stock already exist"})
+    
+    return JsonResponse({
+        "result": "Stock added successfully",
+    })    
+
+    
 

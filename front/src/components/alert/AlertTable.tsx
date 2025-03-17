@@ -9,10 +9,15 @@ type ColumnsType<T extends object = object> = TableProps<T>['columns'];
 type TablePaginationConfig = Exclude<GetProp<TableProps, 'pagination'>, boolean>;
 
 interface DataType {
-  name: string;
+  name: {
+    first: string;
+    last: string;
+  };
   symbol: string;
   current_price: string;
-  daily_change:string;
+  login: {
+    uuid: string;
+  };
 }
 
 interface TableParams {
@@ -28,21 +33,21 @@ const columns: ColumnsType<DataType> = [
     dataIndex: 'name',
     sorter: true,
     render: (name) => `${name.first} ${name.last}`,
-    width: '20%',
+    width: '33%',
   },
   {
-    title: 'Gender',
-    dataIndex: 'gender',
-    filters: [
-      { text: 'Male', value: 'male' },
-      { text: 'Female', value: 'female' },
-    ],
-    width: '20%',
+    title: 'Symbol',
+    dataIndex: 'symbol',
+    width: '33%',
   },
   {
-    title: 'Email',
-    dataIndex: 'email',
+    title: 'Current Price',
+    dataIndex: 'current_price',
+    width: '33%'
   },
+
+
+  
 ];
 
 const toURLSearchParams = <T extends AnyObject>(record: T) => {

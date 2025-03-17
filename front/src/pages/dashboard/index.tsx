@@ -56,7 +56,7 @@ export default function Index() {
              <Col span={18}>
             <Card style={{ width: "100%" }}>
               <div style={{ width: "100%", height: "600px" }}>
-                <AdvancedRealTimeChart theme="dark" autosize={true} />
+                <AdvancedRealTimeChart  autosize={true} />
               </div>
             </Card>
           </Col>

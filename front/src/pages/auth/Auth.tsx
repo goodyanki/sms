@@ -21,13 +21,11 @@ const App: React.FC = () => {
     const result = await response.json();
     if(response.ok){
 
-        localStorage.setItem("isLogin", result.isLogin);
-
-
+        localStorage.setItem("userid", result.user_id)
         console.log("Success:", result)
         setTimeout(() => {
         navigate("/dashboard");
-      }, 1500);
+      });
     }
     else{
         console.log("Error:", result)
