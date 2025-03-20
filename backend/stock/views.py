@@ -11,25 +11,23 @@ from rest_framework.decorators import api_view
 #documentation: https://yfinance-python.org/index.html
 
 
-def get_stock_info(request):
-    symbol = request.GET.get('symbol', 'NVDA')
-    stock = yf.Ticker(symbol)
+def get_stock_info(symbol):
+    stock =  yf.Ticker(symbol)
     data = stock.history(period='5d')
+
 
     close = data['Close'].iloc[-1]  #last day close
     d1_prev_close = data['Close'].iloc[-2]  #previous day close
-
     daily_change = round((close - d1_prev_close) / d1_prev_close * 100, 2)
 
-    stockInfo = {
+    return  {
         'name': stock.info.get('longName', 'N/A'),
         'symbol': symbol.upper(),
         'exchange': stock.info.get('exchange', 'N/A'),
-        'price': round(close, 2),
+        'current_price': round(close, 2),
         'daily_change': f"{daily_change}%",
     }
 
-    return JsonResponse(stockInfo)
 
 
 @api_view(['POST'])
@@ -77,5 +75,32 @@ def add_to_watchlist(request):
         "result": "Stock added successfully",
     })    
 
+
+@api_view(['GET'])
+def get_watchlist(request):
+    user_id = request.GET.get('user_id')
+    watchlist = Watchlist.objects.get(user_id=user_id)
+    stocks = watchlist.stock.all()
+
+    watchlist_stocks = []
+    for stock in stocks:
+        stock_info = get_stock_info(stock.symbol)
+        watchlist_stocks.append(stock_info)
+    return JsonResponse({'watchlist': watchlist_stocks})
+
+@api_view(['GET'])
+def get_index_trend(request):
+    symbol = request.GET.get('symbol')
+    index = yf.Ticker(symbol)
+    data = index.history(period='1mo')
+    close_price = data['Close'].tolist()
+
+    return JsonResponse({'close_price': close_price})
+
     
+    
+
+
+    
+
 

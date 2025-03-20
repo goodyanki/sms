@@ -23,9 +23,7 @@ const App: React.FC = () => {
 
         localStorage.setItem("userid", result.user_id)
         console.log("Success:", result)
-        setTimeout(() => {
         navigate("/dashboard");
-      });
     }
     else{
         console.log("Error:", result)

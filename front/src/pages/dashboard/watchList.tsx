@@ -1,5 +1,6 @@
 import { Button, Card, Col, Form, Input, Row, Space } from "antd";
 import WatchlistTable from "../../components/watchlist/watchlistTable"
+import { RedoOutlined } from "@ant-design/icons";
 
 const onFinish = async (values: any) => {
   console.log("Received values of form: ", values);
@@ -39,6 +40,9 @@ export default function WatchList() {
             </Form.Item>
           </Space.Compact>
         </Form>
+        <Button href="/dashboard/watch-list" type="primary" style={{ marginLeft: "auto" }}>  
+          <RedoOutlined />
+        </Button> 
       </div>
 
       <WatchlistTable />
