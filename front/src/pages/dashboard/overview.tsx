@@ -51,7 +51,7 @@ export default function Overview() {
       <h1 style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}> Overview </h1>
       <Row gutter={16} style={{ padding: 24 }}>
         <Col span={6}>
-          <Card style={{ height: 160, padding: 0, border: "none" }}>
+          <Card style={{ height: 160, padding: 0, border: "none"}}>
              <ReactECharts option={options} style={{ height: "120px" }} />
           </Card>
         </Col>

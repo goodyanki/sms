@@ -98,7 +98,18 @@ def get_index_trend(request):
     return JsonResponse({'close_price': close_price})
 
     
-    
+@api_view(['POST'])
+def handle_order(request):
+    symbol = request.data.get('symbol')
+    user_id = request.data.get('user_id')
+    order_type = request.data.get('order_type')
+    quantity = request.data.get('quantity')
+    price = request.data.get('price')
+    total_price = request.data.get('total_price')
+    order_status = request.data.get('order_status')
+
+    print(symbol, user_id, order_type, quantity, price, total_price, order_status)
+    return JsonResponse({'message': 'Order placed successfully'})
 
 
     

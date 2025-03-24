@@ -9,6 +9,7 @@ import {
   VideoCameraOutlined,
   SunOutlined,
   MoonOutlined,
+  StockOutlined,
 } from "@ant-design/icons";
 import { Button, Layout, Menu, theme, ConfigProvider } from "antd";
 import { TickerTape } from "react-ts-tradingview-widgets";
@@ -16,7 +17,7 @@ import { TickerTape } from "react-ts-tradingview-widgets";
 const { Header, Sider, Content } = Layout;
 
 const App: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
 
   return (
@@ -70,6 +71,11 @@ const App: React.FC = () => {
                 icon: <InboxOutlined />,
                 label: <Link to="/dashboard/system-alert">System Alert</Link>,
               },
+              {
+                key: "5",
+                icon:<StockOutlined />,
+                label: <Link to="/dashboard/paper_trading">Paper_Trading</Link>,
+              }
             ]}
           />
         </Sider>
