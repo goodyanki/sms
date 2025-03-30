@@ -35,6 +35,10 @@ class OrderHistory(models.Model):
     order_type = models.CharField(max_length=3, default="MARKET")
     order_id = models.CharField(max_length=32, unique=True)
     order_side  = models.CharField(max_length=32, default="BUY")
+    stop_loss = models.FloatField(null=True, blank=True)
+    take_profit = models.FloatField(null=True, blank=True)
+
+    is_triggered = models.BooleanField(default=False)
 
     class Meta:
         unique_together = [["user", "order_id"]]
@@ -42,3 +46,12 @@ class OrderHistory(models.Model):
 class UserAccount(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='account')
     balance = models.FloatField(default=100000)
+
+
+class PriceAlert(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="price_alerts")
+    symbol = models.CharField(max_length=16)
+    price= models.FloatField()
+    is_triggered = models.BooleanField(default=False)
+
+

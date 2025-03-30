@@ -22,3 +22,7 @@ urllib3==2.3.0
 yfinance==0.2.54
 django-cors-headers
 djangorestframework
+celery
+redis
+django-celery-beat
+

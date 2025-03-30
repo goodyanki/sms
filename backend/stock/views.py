@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import OrderHistory, UserAccount, Watchlist, Watchliststock, Portfolio
+from .models import OrderHistory, UserAccount, Watchlist, Watchliststock, Portfolio, PriceAlert
 
 # Create your views here.
 import yfinance as yf
@@ -7,40 +7,38 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from rest_framework.decorators import api_view
 import uuid
-import akshare as ak
 
 
 #documentation: https://yfinance-python.org/index.html
 
 def generate_order_id():
     return str(uuid.uuid4())
- 
+
+
 def get_stock_current_price(symbol):
     stock = yf.Ticker(symbol)
     data = stock.history(period='1d')
     return data['Close'].iloc[-1]
 
+
 #def get_hk_curreent_price(symbol):
-    
 
 
 def get_stock_info(symbol):
-    stock =  yf.Ticker(symbol)
+    stock = yf.Ticker(symbol)
     data = stock.history(period='5d')
-
 
     close = data['Close'].iloc[-1]  #last day close
     d1_prev_close = data['Close'].iloc[-2]  #previous day close
     daily_change = round((close - d1_prev_close) / d1_prev_close * 100, 2)
 
-    return  {
+    return {
         'name': stock.info.get('longName', 'N/A'),
         'symbol': symbol.upper(),
         'exchange': stock.info.get('exchange', 'N/A'),
         'current_price': round(close, 2),
         'daily_change': f"{daily_change}%",
     }
-
 
 
 @api_view(['POST'])
@@ -67,7 +65,8 @@ def login(request):
         user = User.objects.get(username=username)
         if user.check_password(password):
             return JsonResponse(
-                {'message': 'Login successful','username': user.username, 'email': user.email, 'isLogin': "11", 'user_id':user.id},
+                {'message': 'Login successful', 'username': user.username, 'email': user.email, 'isLogin': "11",
+                 'user_id': user.id},
             )
         else:
             return JsonResponse({'error': 'Invalid credentials'})
@@ -79,14 +78,14 @@ def add_to_watchlist(request):
     user_id = request.data.get('user_id')
 
     watchlist, watchlist_created = Watchlist.objects.get_or_create(user_id=user_id)
-    stock, symbol_created  = Watchliststock.objects.get_or_create(watchlist = watchlist, symbol = symbol)
+    stock, symbol_created = Watchliststock.objects.get_or_create(watchlist=watchlist, symbol=symbol)
 
     if not symbol_created:
         return JsonResponse({"result": "Stock already exist"})
-    
+
     return JsonResponse({
         "result": "Stock added successfully",
-    })    
+    })
 
 
 @api_view(['GET'])
@@ -116,30 +115,37 @@ def get_index_trend(request):
 
     return JsonResponse(
         {'close_price': close_price}
-            )
+    )
 
-    
+
 @api_view(['POST'])
 def handle_order(request):
     symbol = request.data.get('symbol')
-    user_id = request.data.get('user_id') 
+    user_id = request.data.get('user_id')
     order_type = request.data.get('order_type')
     quantity = request.data.get('quantity')
     price = request.data.get('price')
     order_side = request.data.get('order_side')
+    stop_loss = request.data.get('stop_loss')
+    take_profit = request.data.get('take_profit')
 
+    if stop_loss is not None:
+        stop_loss = float(stop_loss)
+    if take_profit is not None:
+        take_profit = float(take_profit)
 
     order_id = generate_order_id()
     current_price = get_stock_current_price(symbol)
 
     if order_type == "Market":
         final_price = current_price
+        is_triggered = True
     else:
         final_price = price
+        is_triggered = False
 
     total_price = final_price * quantity
-    
-        
+
     OrderHistory.objects.create(
         user_id=user_id,
         symbol=symbol,
@@ -147,46 +153,45 @@ def handle_order(request):
         price=final_price,
         order_type=order_type,
         order_id=order_id,
-        order_side=order_side
+        order_side=order_side,
+        stop_loss=stop_loss,
+        take_profit=take_profit,
+        is_triggered=is_triggered
     )
 
-    user = UserAccount.objects.get(user_id=user_id)
-    user.balance -= total_price
-    print(f"After: {user.balance}")
+    if is_triggered:
+        user = UserAccount.objects.get(user_id=user_id)
+        user.balance -= total_price
 
-    user.save()
-    portfolio = Portfolio.objects.filter(user_id=user_id, symbol=symbol).first()
+        user.save()
+        portfolio = Portfolio.objects.filter(user_id=user_id, symbol=symbol).first()
 
-    if portfolio is None:
-        if order_side == "BUY":
-            Portfolio.objects.create(
-                user_id=user_id,
-                symbol=symbol,
-                quantity=quantity,
-                buy_price=final_price,
-                avg_price=final_price,
-            )
-            print("111")
-    else:
-        if order_side == "BUY":
-            total_quantity = portfolio.quantity + quantity
-            
-            total_cost = portfolio.quantity * portfolio.avg_price + quantity * final_price
-            portfolio.avg_price = total_cost / total_quantity
-            portfolio.quantity = total_quantity
-            portfolio.save()
-        elif order_side == "SELL":
-            portfolio.quantity -= quantity
-            if portfolio.quantity <= 0:
-                portfolio.delete()  
-            else:
+        if portfolio is None:
+            if order_side == "BUY":
+                Portfolio.objects.create(
+                    user_id=user_id,
+                    symbol=symbol,
+                    quantity=quantity,
+                    buy_price=final_price,
+                    avg_price=final_price,
+                )
+                print("111")
+        else:
+            if order_side == "BUY":
+                total_quantity = portfolio.quantity + quantity
+
+                total_cost = portfolio.quantity * portfolio.avg_price + quantity * final_price
+                portfolio.avg_price = total_cost / total_quantity
+                portfolio.quantity = total_quantity
                 portfolio.save()
+            elif order_side == "SELL":
+                portfolio.quantity -= quantity
+                if portfolio.quantity <= 0:
+                    portfolio.delete()
+                else:
+                    portfolio.save()
 
-    
-
-
-
-    return JsonResponse({ 
+    return JsonResponse({
         'message': 'Order placed successfully'
     })
 
@@ -201,6 +206,7 @@ def get_balance(request):
     return JsonResponse({'balance': user.balance})
 '''
 
+
 @api_view(['POST'])
 def get_balance(request):
     user_id = request.data.get('user_id')
@@ -211,11 +217,10 @@ def get_balance(request):
 @api_view(['POST'])
 def get_marketValue(request):
     user_id = request.data.get('user_id')
-    
+
     positions = Portfolio.objects.filter(user_id=user_id)
     total_value = 0
     for position in positions:
-
         current_price = get_stock_current_price(position.symbol)
         total_value += position.quantity * current_price
 
@@ -232,13 +237,12 @@ def get_unrealizedPL(request):
     result = 0
     buy_total = 0
     for position in positions:
-
         current_price = get_stock_current_price(position.symbol)
-        
+
         total_value += position.quantity * current_price
         buy_total += position.quantity * position.avg_price
 
-    result = round(buy_total - total_value,2)
+    result = round(buy_total - total_value, 2)
 
     print("buy_total:", buy_total)
     print("total_value:", total_value)
@@ -264,7 +268,6 @@ def get_NLV(request):
     return JsonResponse({'nlv': nlv})
 
 
-
 @api_view(['GET'])
 def get_portfolio_info(request):
     user_id = request.GET.get('user_id')
@@ -277,3 +280,39 @@ def get_portfolio_info(request):
 
     return JsonResponse({'portfolio': portfolio_info})
 
+
+@api_view(['POST'])
+def get_alert_price(request):
+    user_id = request.data.get('user_id')
+    symbol = request.data.get('symbol')
+    price = request.data.get('price')
+    user = User.objects.get(id=user_id)
+
+    PriceAlert.objects.create(
+        user=user,
+        symbol=symbol,
+        price=price
+    )
+    return JsonResponse({"message": "Alert created successfully."})
+
+
+@api_view(['POST'])
+def handle_limit_and_alert(request):
+    orders = OrderHistory.objects.filter(order_type="LIMIT", is_triggered=False)
+    for order in orders:
+        try:
+            current_price = get_stock_current_price(order.symbol)
+        except:
+            continue
+
+    if (
+            (order.order_side == "BUY" and current_price <= order.price) or
+            (order.order_side == "SELL" and current_price >= order.price) or
+            (order.stop_loss and order.order_side == "BUY" and current_price <= order.stop_loss) or
+            (order.take_profit and order.order_side == "BUY" and current_price >= order.take_profit)
+    ):
+        execute_order(order, current_price)
+
+
+def execute_order(order, price):
+    pass
