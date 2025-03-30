@@ -1,64 +1,62 @@
-import { Card, Col, Row } from "antd";
-import ReactECharts from "echarts-for-react";//https://github.com/hustcc/echarts-for-react
-import {useEffect, useState } from "react";
+import { Card, Col, Row, Statistic, Tooltip } from "antd";
+import { useEffect, useState } from "react";
+import { Tiny } from "@ant-design/plots";
 
 export default function Overview() {
   const [data, setData] = useState([]);
   useEffect(() => {
     async function fetchData() {
-      const response = await fetch("http://localhost:8000/api/indexInfo/?symbol=QQQ");
+      const response = await fetch(
+        "http://localhost:8000/api/indexInfo/?symbol=QQQ"
+      );
       const result = await response.json();
-      setData(result.close_price); 
+      //console.log("Result", result); 
+      setData(result.close_price);
     }
     fetchData();
+  }, []);
 
-},[]);
+  const DemoArea = () => {
+    const chartData = data.map((price, day) => ({ price, day }));
 
-
-  const xAxisData = []
-  for(let i = 0; i < data.length; i++){
-    xAxisData.push("day"+i)
-  }
-
-
-  const options = {
-    title: { text: "NASDQ" },
-    grid: { top: 30, right: 8, bottom: 24, left: 8 },
-    xAxis: {
-      type: "category",
-      data: xAxisData,
-      axisLine: { show: false }, 
-      axisTick: { show: false },
-      axisLabel: { show: false }, 
-    },
-    yAxis: { type: "value", show: false, scale: true },
-    series: [
-      {
-        data: data, 
-        type: "line",
-        smooth: true,
-        symbol: "none", 
-        lineStyle: { width: 2, color: "#5470C6" },
+    const config = {
+      data: chartData,
+      autoFit: true,
+      height: 120,
+      padding: 8,
+      shapeField: "smooth",
+      xField: "day",
+      yField: "price",
+      style: {
+        fill: "linear-gradient(-90deg, white 0%, darkblue 100%)",
+        fillOpacity: 0.6,
       },
-    ],
-    tooltip: { trigger: "axis" },
+    };
+    return <Tiny.Area {...config} />;
   };
-
 
   return (
     <>
-      
-      <h1 style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}> Overview </h1>
+      <h1 style={{ fontSize: "24px", fontWeight: "bold", margin: 0 }}>
+        {" "}
+        Overview{" "}
+      </h1>
       <Row gutter={16} style={{ padding: 24 }}>
+        <Col span={6}  >
+          <div >
+            <p style={{textAlign:"center", padding: 0, fontWeight:"bold"}}>NASDQ QQQ Trend</p>
+            <DemoArea />
+          </div>
+          
+        </Col>
         <Col span={6}>
-          <Card style={{ height: 160, padding: 0, border: "none"}}>
-             <ReactECharts option={options} style={{ height: "120px" }} />
-          </Card>
+          <div style={{height: "120px"}}>
+            <Statistic title="Current Assets" value={112893} />
+            
+          </div>
+          
         </Col>
       </Row>
-
     </>
-
-
-)
+  );
 }

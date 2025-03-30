@@ -141,7 +141,7 @@ const App: React.FC = () => {
           <Content
             style={{
               padding: 24,
-              background: themeMode === "dark" ? "#1f1f1f" : "#ffffff",
+              background: "linear-gradient(to top right,rgb(227, 204, 241),rgb(197, 218, 236))", 
               borderRadius: 8,
               flex: 1,
               overflow: "auto",
