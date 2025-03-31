@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import OrderHistory, UserAccount, Watchlist, Watchliststock, Portfolio, PriceAlert
+from .models import Alert, OrderHistory, UserAccount, Watchlist, Watchliststock, Portfolio, PriceAlert
 
 # Create your views here.
 import yfinance as yf
@@ -7,6 +7,9 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from rest_framework.decorators import api_view
 import uuid
+import time
+from django.core.mail import send_mail
+
 
 
 #documentation: https://yfinance-python.org/index.html
@@ -287,11 +290,20 @@ def get_alert_price(request):
     symbol = request.data.get('symbol')
     price = request.data.get('price')
     user = User.objects.get(id=user_id)
+    is_long = request.data.get('alert_type')
+    print(is_long)
+    if is_long == 'long':
+        is_long = True
+    else:
+        is_long = False
+    print(is_long)
 
     PriceAlert.objects.create(
         user=user,
         symbol=symbol,
-        price=price
+        price=price,
+        direction = is_long
+
     )
     return JsonResponse({"message": "Alert created successfully."})
 
@@ -305,14 +317,92 @@ def handle_limit_and_alert(request):
         except:
             continue
 
-    if (
-            (order.order_side == "BUY" and current_price <= order.price) or
-            (order.order_side == "SELL" and current_price >= order.price) or
-            (order.stop_loss and order.order_side == "BUY" and current_price <= order.stop_loss) or
-            (order.take_profit and order.order_side == "BUY" and current_price >= order.take_profit)
-    ):
-        execute_order(order, current_price)
+        if (
+                (order.order_side == "BUY" and current_price <= order.price) or
+                (order.order_side == "SELL" and current_price >= order.price) or
+                (order.stop_loss and order.order_side == "BUY" and current_price <= order.stop_loss) or
+                (order.take_profit and order.order_side == "BUY" and current_price >= order.take_profit)
+        ):
+            execute_order(order, current_price)
+
+    #handle price alert
+    alerts = PriceAlert.objects.filter(is_triggered=False)
+    for alert in alerts:
+        try:
+            alert_current_price = get_stock_current_price(alert.symbol)
+        except:
+            continue
+        if(
+            alert.direction == True and alert_current_price >= alert.price or
+
+            alert.direction == False and alert_current_price <= alert.price
+        ):
+            do_alert(alert);
+        
+        
+
+
 
 
 def execute_order(order, price):
-    pass
+    order.is_triggered = True
+    order.save()
+
+    portfolio, created = Portfolio.objects.get_or_create(
+        user=order.user,
+        symbol=order.symbol,
+        defaults={'quantity': 0}
+    )
+
+    if order.order_side == 'BUY':
+        portfolio.quantity += order.quantity
+    elif order.order_side == 'SELL':
+        portfolio.quantity -= order.quantity
+    
+
+    portfolio.save()
+
+
+def do_alert(alert):
+    current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) 
+    current_price = get_stock_current_price(alert.symbol)
+    Alert.objects.create(
+        user=alert.user,
+        symbol=alert.symbol,
+        price=current_price,
+        time=current_time
+    )
+
+
+    send_mail(
+        subject=f'Alert Triggered for {alert.symbol}',
+        message=f'Hi, your alert for {alert.symbol} was triggered at {current_price}',
+        from_email=None,
+        recipient_list=[alert.user.email],  
+)   
+
+
+
+    
+
+
+
+@api_view(['GET'])
+def getAlertTable(request):
+    user_id = request.GET.get('user_id')
+    print(user_id)
+    alerts = Alert.objects.filter(user_id=user_id)
+
+
+    alert_data = []
+    for alert in alerts:
+        stock = yf.Ticker(alert.symbol)
+
+        alert_data.append({
+            'name': stock.info.get('longName', 'N/A'),
+            'symbol': alert.symbol,
+            'time':alert.time,
+            'price':get_stock_current_price(alert.symbol)
+        })
+    print(alert_data)
+    return JsonResponse({'alerts': alert_data})
