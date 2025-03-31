@@ -1,69 +1,106 @@
 import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
-import {Card, Col, Row, Select} from "antd";
-import {useState} from "react";
+import { Card, Col, Row } from "antd";
+import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 
+const indicators = [
+  {
+    key: "STD;EMA",
+    title: "EMA",
+    description:
+      "EMA (Exponential Moving Average): A weighted moving average that reacts more significantly to recent price changes.",
 
+  },
+  {
+    key: "STD;Divergence%1Indicator",
+    title: "RSI",
+    description:
+      "RSI (Relative Strength Index): Measures the speed and change of price movements, indicating overbought or oversold conditions.",
+  },
+  {
+    key: "STD;MACD",
+    title: "MACD",
+    description:
+      "MACD (Moving Average Convergence Divergence): A trend-following momentum indicator showing the relationship between two EMAs.",
+  },
+  {
+    key: "STD;Bollinger_Bands",
+    title: "BOLL",
+    description:
+      "BOLL (Bollinger Bands): A volatility indicator based on a moving average with upper and lower bands.",
+  },
+];
 
 export default function Index() {
+  const [selected, setSelected] = useState<string | null>(null);
 
-    const [current, setCurrent] = useState("EMA");
-    const handleChange = (value: string) => {
-    console.log(`selected ${value}`);
-    setCurrent(value);
-    };
+  return (
+    <>
+      <h1>Technical Index Analysis</h1>
 
-  return(
-      <>
-        <h1>Technical Index Analysis</h1>
-
-         <Row gutter={16} style={{ padding: 24 }}>
-             <Col span={6}>
-                 <h3>Indicators</h3>
-                 <h4>Some indicators for you to learn!</h4>
-                <Select
-                      defaultValue="EMA"
-                      style={{ width: "100%" }}
-                      onChange={handleChange}
-                      options={[
-                        { value: 'EMA', label: 'EMA' },
-                        { value: 'RSI', label: 'RSI' },
-                        { value: 'MACD', label: 'MACD' },
-                        { value: 'BOLL', label: 'BOLL' },
-                        { value: 'disabled', label: 'Disabled', disabled: true },
-                      ]}
-                    />
-                 <Card style={{ marginTop: 16 }}>
-                      {current === "EMA" ? (
-                          <p><a style={{fontWeight: "bold", fontSize:"20px"}}>EMA</a>：Exponential Moving Average<br/>
-                              <a style={{fontWeight: "bold"}}>EMA(5)</a>: Short-term period, reflects short-term price trends.<br/>
-                              <a style={{fontWeight: "bold"}}>EMA(20)</a>: Medium-term trend, widely used in trading.<br/>
-                              <a style={{fontWeight: "bold"}}>EMA(50)</a>: Longer trend analysis.<br/>
-                              <a style={{fontWeight: "bold"}}>EMA(200)</a>: Used for long-term trend determination, commonly applied in the stock market.<br/>
-
-                          </p>
-                          ) : current === "RSI" ? (
-                          <p>RSI（相对强弱指数）用于衡量市场超买或超卖情况。</p>
-                            ) : current === "MACD" ? (
-                          <p>MACD（指数平滑异同移动平均线）用于分析趋势和动量。</p>
-                            ) : current === "BOLL" ? (
-                          <p>BOLL（布林带）用于判断市场波动范围。</p>
-                            ) : (<p>请选择一个技术指标以查看介绍。</p>
-
-                      )}
-                 </Card>
-
-             </Col>
-             <Col span={18}>
-            <Card style={{ width: "100%" }}>
-              <div style={{ width: "100%", height: "600px" }}>
-                <AdvancedRealTimeChart  autosize={true} />
-              </div>
-            </Card>
-          </Col>
-         </Row>
-
-
-      </>
-
+      <Row style={{ padding: 24 }}>
+        <Col span={8}>
+          <Row gutter={[8, 8]}>
+            {indicators.map((indicator) => (
+              <Col span={24} key={indicator.key}>
+                <motion.div
+                  initial={{ scale: 1 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.97 }}
+                  style={{ cursor: "pointer" }}
+                  onClick={() =>
+                    setSelected(
+                      selected === indicator.key ? null : indicator.key
+                    )
+                  }
+                >
+                  <AnimatePresence mode="wait">
+                    {selected === indicator.key ? (
+                      <motion.div
+                        key="expanded"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Card
+                          style={{
+                            backgroundColor: "#f6ffed",
+                            borderRadius: 12,
+                          }}
+                          bodyStyle={{ fontSize: 16 }}
+                        >
+                          {indicator.description }
+                        </Card>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="collapsed"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <Card
+                          hoverable
+                          style={{ borderRadius: 12, textAlign: "center" }}
+                          bodyStyle={{ fontSize: 18, fontWeight: "bold" }}
+                        >
+                          {indicator.title}
+                        </Card>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              </Col>
+            ))}
+          </Row>
+        </Col>
+        <Col span={16}>
+          <div style={{ width: "90%", height: "500px", marginLeft: "auto" }}>
+            <AdvancedRealTimeChart autosize={true} studies={selected ? [selected] : []}/>
+          </div>
+        </Col>
+      </Row>
+    </>
   );
 }

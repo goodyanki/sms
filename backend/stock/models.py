@@ -53,5 +53,13 @@ class PriceAlert(models.Model):
     symbol = models.CharField(max_length=16)
     price= models.FloatField()
     is_triggered = models.BooleanField(default=False)
+    direction = models.BooleanField(default=True)
+
+
+class Alert(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="alert")
+    symbol = models.CharField(max_length=16)
+    price= models.FloatField()
+    time = models.CharField(max_length=32)
 
 

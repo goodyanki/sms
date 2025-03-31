@@ -2,22 +2,16 @@
 import React, { useEffect, useState } from 'react';
 import type { GetProp, TableProps } from 'antd';
 import { Table } from 'antd';
-import type { AnyObject } from 'antd/es/_util/type';
 import type { SorterResult } from 'antd/es/table/interface';
 
 type ColumnsType<T extends object = object> = TableProps<T>['columns'];
 type TablePaginationConfig = Exclude<GetProp<TableProps, 'pagination'>, boolean>;
 
 interface DataType {
-  name: {
-    first: string;
-    last: string;
-  };
+  name: string;
   symbol: string;
   current_price: string;
-  login: {
-    uuid: string;
-  };
+  daily_change:string;
 }
 
 interface TableParams {
@@ -32,24 +26,26 @@ const columns: ColumnsType<DataType> = [
     title: 'Name',
     dataIndex: 'name',
     sorter: true,
-    render: (name) => `${name.first} ${name.last}`,
-    width: '33%',
+    width: '25%',
   },
   {
     title: 'Symbol',
     dataIndex: 'symbol',
-    width: '33%',
+    width: '25%',
   },
   {
     title: 'Current Price',
-    dataIndex: 'current_price',
-    width: '33%'
+    dataIndex: 'price',
+    width: '25%',
   },
+  {
+    title: 'Trigger Time',
+    dataIndex: 'time',
+    width: '25%',
 
-
-  
+  },
 ];
-
+/*
 const toURLSearchParams = <T extends AnyObject>(record: T) => {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(record)) {
@@ -63,6 +59,7 @@ const getRandomuserParams = (params: TableParams) => ({
   page: params.pagination?.current,
   ...params,
 });
+*/
 
 const App: React.FC = () => {
   const [data, setData] = useState<DataType[]>();
@@ -74,14 +71,14 @@ const App: React.FC = () => {
     },
   });
 
-  const params = toURLSearchParams(getRandomuserParams(tableParams));
+  const params = localStorage.getItem("userid");
 
   const fetchData = () => {
     setLoading(true);
-    fetch(`https://randomuser.me/api?${params.toString()}`)
+    fetch(`http://127.0.0.1:8000/api/getAlertTable/?user_id=${params}`)
       .then((res) => res.json())
-      .then(({ results }) => {
-        setData(results);
+      .then(({ alerts }) => {
+        setData(alerts);
         setLoading(false);
         setTableParams({
           ...tableParams,
@@ -120,7 +117,7 @@ const App: React.FC = () => {
   return (
     <Table<DataType>
       columns={columns}
-      rowKey={(record) => record.login.uuid}
+      rowKey={(record) => record.symbol}
       dataSource={data}
       pagination={tableParams.pagination}
       loading={loading}
