@@ -18,6 +18,9 @@ def generate_order_id():
     return str(uuid.uuid4())
 
 
+def check_if_symbol_legal(symnol):
+    pass
+
 def get_stock_current_price(symbol):
     stock = yf.Ticker(symbol)
     data = stock.history(period='1d')
