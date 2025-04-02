@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createChart } from "lightweight-charts";
+import { MiniChart } from "react-ts-tradingview-widgets";
+
 
 //卡内可编辑文字
 const EditableText = ({ text, onSave }) => {
@@ -303,7 +305,8 @@ const Overview = () => {
                   position: "relative",
                 }}
               >
-                <SmallChart />
+                <MiniChart colorTheme="light" width="100%"s></MiniChart>
+
                 <div
                   style={{
                     position: "absolute",
