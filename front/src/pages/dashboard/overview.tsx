@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createChart } from "lightweight-charts";
+import { MiniChart } from "react-ts-tradingview-widgets";
+import { TechnicalAnalysis } from "react-ts-tradingview-widgets";
+import { RightOutlined } from "@ant-design/icons";
 
 //卡内可编辑文字
 const EditableText = ({ text, onSave }) => {
@@ -82,6 +85,8 @@ const SmallChart = ({ width = 300, height = 120 }) => {
 };
 
 const StocksBlock = () => {
+  const [symbol, setSymbol] = useState("AAPL");
+
   return (
     <div
       style={{
@@ -92,58 +97,97 @@ const StocksBlock = () => {
         marginTop: "2rem",
       }}
     >
-      <h3 style={{ marginBottom: "1rem" }}>Stocks </h3>
-      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-        {"Amazon,Apple,Yadea,Simons".split(",").map((item) => (
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            key={item}
-            style={{
-              padding: "0.75rem 1.25rem",
-              borderRadius: "12px",
-              background: "#f3f4f6", //小图标
-              cursor: "pointer",
-              fontSize: "14px",
-              fontWeight: 500,
-              color: "#333",
-            }}
-          >
-            {item}
-          </motion.div>
-        ))}
+      <div style={{ marginBottom: "1rem" }}>
+        <span style={{ fontWeight: "bold", marginRight: "0.5rem" }}>
+          CLICK HERE TO CHANGE SYMBOL{" "}
+          <span>
+            <RightOutlined />
+          </span>
+        </span>
+        <EditableText
+          text={symbol}
+          onSave={(val) => setSymbol(val.toUpperCase())}
+        />
       </div>
+
+      <TechnicalAnalysis
+        colorTheme="light"
+        width="100%"
+        isTransparent={true}
+        symbol={symbol}
+      ></TechnicalAnalysis>
     </div>
   );
 };
 
 const TodayPopular = () => {
-  const gainers = [
-    { name: "APPL", full: "Apple Inc.", percent: "+14.5%", color: "#9e9e9e" },
-    { name: "FB", full: "Facebook, Inc.", percent: "+12.9%", color: "#3b5998" },
-    {
-      name: "AMZN",
-      full: "Amazon.com, Inc.",
-      percent: "+10.2%",
-      color: "#ff9b24",
-    },
-  ];
+  const [gainers, setGainers] = useState([]);
+  const [weekly, setweekly] = useState([]);
 
-  const popular = [
-    { name: "TWTR", full: "Twitter Inc.", percent: "+14.5%", color: "#55acee" },
-    {
-      name: "PYPL",
-      full: "Paypal Holdings Inc.",
-      percent: "+12.9%",
-      color: "#003087",
-    },
-    {
-      name: "GOOGL",
-      full: "Alphabet Inc.",
-      percent: "+10.2%",
-      color: "#d62d20",
-    },
-  ];
+  useEffect(() => {
+    const fetchGainers = async () => {
+      const response = await fetch("http://localhost:8000/api/getTop3Gainer", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const result = await response.json();
+      if (response.ok) {
+        const formatted = result.stock.map((stock, index) => {
+          let color = "#000000";
+          if (index === 0) color = "#FFD700";
+          else if (index === 1) color = "#C0C0C0";
+          else if (index === 2) color = "#CD7F32";
+
+          return {
+            name: stock.symbol,
+            full: stock.short_name,
+            percent: `+${stock.change_percent.toFixed(2)}%`,
+            color: color,
+          };
+        });
+        setGainers(formatted);
+        console.log(formatted);
+      } else {
+        console.error("Failed to fetch gainers:", result);
+      }
+    };
+
+    fetchGainers();
+
+    const fetchPopular = async () => {
+      const response = await fetch("http://localhost:8000/api/getWeeklyTrend", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const Trend = await response.json();
+
+      if (response.ok) {
+        const formatted = Trend.stock.slice(0, 3).map((stock, index) => {
+          let color = "#000000";
+          if (index === 0) color = "#FFD700";
+          else if (index === 1) color = "#C0C0C0";
+          else if (index === 2) color = "#CD7F32";
+
+          return {
+            name: stock.symbol,
+            full: stock.short_name,
+            percent: `+${stock.change_percent.toFixed(2)}%`,
+            color: color,
+          };
+        });
+        setweekly(formatted);
+        console.log(formatted);
+      } else {
+        console.error("Failed to fetch gainers:", Trend);
+      }
+    };
+
+    fetchPopular();
+  }, []);
 
   return (
     <div
@@ -156,7 +200,7 @@ const TodayPopular = () => {
     >
       {[
         { title: "Today Gainers", data: gainers },
-        { title: "Popular this week", data: popular },
+        { title: "Popular this week", data: weekly },
       ].map((section) => (
         <div style={{ flex: 1 }} key={section.title}>
           <h3
@@ -178,7 +222,7 @@ const TodayPopular = () => {
                   width: "36px",
                   height: "36px",
                   backgroundColor: stock.color,
-                  borderRadius: "8px",
+                  borderRadius: "20px",
                   marginRight: "1rem",
                 }}
               ></div>
@@ -206,31 +250,59 @@ const Overview = () => {
   const [cards, setCards] = useState([
     {
       id: "1",
-      title: "click to edit",
+      title: "AAPL",
       gradient: "#8ab4f8",
       color: "#00c853",
       todo: "todo: add some text (editable)",
+      symbol: "AAPL",
     },
     {
       id: "2",
-      title: "CARD B",
+      title: "NVDA",
       gradient: "#fbc02d",
       color: "#f5051d",
       todo: "todo: add text",
+      symbol: "NVDA",
     },
     {
       id: "3",
-      title: "CARD C",
+      title: "MSFT",
       gradient: "#983682",
       color: "#123456",
       todo: "todo: add text",
+      symbol: "MSFT",
     },
     {
       id: "4",
-      title: "CARD D",
+      title: "GOOGL",
       gradient: "#515169",
       color: "#777666",
       todo: "todo: add text",
+      symbol: "GOOGL",
+    },
+    {
+      id: "5",
+      title: "AMZN",
+      gradient: "#735935",
+      color: "#112233",
+      todo: "todo: add text",
+      symbol: "AMZN",
+    },
+    {
+      id: "6",
+      title: "META",
+      gradient: "#325483",
+      color: "#444555",
+      todo: "todo: add text",
+      symbol: "META",
+    },
+    {
+      id: "7",
+      title: "TSLA",
+      gradient: "#893858",
+      color: "#999888",
+      todo: "todo: add text",
+      symbol: "TSLA",
     },
   ]);
 
@@ -303,7 +375,13 @@ const Overview = () => {
                   position: "relative",
                 }}
               >
-                <SmallChart />
+                <MiniChart
+                  colorTheme="light"
+                  width="100%"
+                  symbol={card.symbol}
+                  isTransparent={true}
+                ></MiniChart>
+
                 <div
                   style={{
                     position: "absolute",
@@ -312,9 +390,7 @@ const Overview = () => {
                     color: card.color,
                     fontWeight: "bold",
                   }}
-                >
-                  +14%
-                </div>
+                ></div>
               </div>
               <div style={{ display: "flex", alignItems: "center" }}>
                 <div

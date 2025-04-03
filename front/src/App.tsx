@@ -1,7 +1,7 @@
 import {BrowserRouter as Router, Routes, Route, Navigate} from "react-router-dom";
 import AppLayout from "./components/Layout.tsx";
 import Auth from "./pages/auth/Auth.tsx";
-import Overview from "./pages/dashboard/overview1";
+import Overview from "./pages/dashboard/overview";
 import WatchList from "./pages/dashboard/watchList.tsx";
 import Index from "./pages/dashboard/index.tsx";
 import Alert from "./pages/dashboard/alert.tsx";
