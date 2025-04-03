@@ -35,8 +35,15 @@ const onFinish = async (values: any) => {
 export default function Alert() {
 
   return (
-    <>
-      <h1>System Alert</h1>
+    <div
+      style={{
+        background:
+          "linear-gradient(to top right,rgb(227,204,241),rgb(197,218,236))",
+        padding: "2rem",
+        minHeight: "100vh",
+      }}
+    >
+      <h1 style={{ fontSize: "48px", fontWeight: "bold", color: "black" }}>System Alert</h1>
       <Row style={{ padding: 24 }}>
         <Col span={24}>
           <div style={{ height: "60px" }}>
@@ -84,6 +91,6 @@ export default function Alert() {
         </Col>
       </Row>
       <AlertTable />
-    </>
+    </div>
   );
 }

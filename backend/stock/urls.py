@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import get_stock_info, register_user, login,add_to_watchlist,get_watchlist,get_index_trend, handle_order,get_balance,get_marketValue,get_unrealizedPL,get_NLV,get_portfolio_info,get_alert_price,getAlertTable
+from .views import get_stock_info, register_user, login,add_to_watchlist,get_watchlist,get_index_trend, handle_order,get_balance,get_marketValue,get_unrealizedPL,get_NLV,get_portfolio_info,get_alert_price,getAlertTable,get_top3_gainers,get_weekly_trend
 
 urlpatterns = [
     path('stock/', get_stock_info, name='get_stock_info'),
@@ -15,7 +15,9 @@ urlpatterns = [
     path('getnlv/', get_NLV, name='getnlv'),
     path('getportfolio/',get_portfolio_info,name='get_portfolio_info'),
     path('addPriceAlert/', get_alert_price, name='get_alert_price'),
-    path('getAlertTable/',getAlertTable, name='get_alert_table')
+    path('getAlertTable/',getAlertTable, name='get_alert_table'),
+    path('getTop3Gainer',get_top3_gainers,name='getTop3Gainer'),
+    path('getWeeklyTrend',get_weekly_trend, name='get_weekly_trend')
 ]
 
 

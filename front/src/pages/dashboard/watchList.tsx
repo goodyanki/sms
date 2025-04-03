@@ -11,7 +11,7 @@ const onFinish = async (values: any) => {
     },
     body: JSON.stringify({
       symbol: values.symbol,
-      user_id: localStorage.getItem("userid"),
+      user_id: localStorage.getItem("test"),
     }),
   });
 
@@ -25,9 +25,16 @@ const onFinish = async (values: any) => {
 
 export default function WatchList() {
   return (
-    <>
+    <div
+          style={{
+            background:
+              "linear-gradient(to top right,rgb(227,204,241),rgb(197,218,236))",
+            padding: "2rem",
+            minHeight: "100vh",
+          }}
+        >
       <div style={{ display: "flex", alignItems: "center", gap: "40px" }}>
-        <h1>WatchList</h1>
+        <h1 style={{ fontSize: "48px", fontWeight: "bold", color: "black" }}>WatchList</h1>
         <Form onFinish={onFinish}>
           <Space.Compact style={{ width: "300px", marginLeft: "275px" }}>
             <Form.Item name="symbol" style={{ marginBottom: "0" }}>
@@ -46,6 +53,6 @@ export default function WatchList() {
       </div>
 
       <WatchlistTable />
-    </>
+    </div>
   );
 }

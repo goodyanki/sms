@@ -326,7 +326,7 @@ const Overview = () => {
       style={{
         background:
           "linear-gradient(to top right,rgb(227,204,241),rgb(197,218,236))",
-        padding: "4rem",
+        padding: "2rem",
         minHeight: "100vh",
       }}
     >
@@ -471,7 +471,11 @@ const Overview = () => {
         <TodayPopular />
 
         <AnimatePresence>
-          {expandedCardId && (
+          {expandedCardId && (() => {
+    const expandedCard = cards.find((c) => c.id === expandedCardId);
+    if (!expandedCard) return null;
+            
+            return(
             <motion.div
               layoutId={expandedCardId}
               onClick={() => setExpandedCardId(null)}
@@ -501,7 +505,12 @@ const Overview = () => {
                 <h2 style={{ marginBottom: "1rem" }}>
                   {cards.find((c) => c.id === expandedCardId)?.title}
                 </h2>
-                <SmallChart width={560} height={200} />
+                <MiniChart
+                  colorTheme="light"
+                  width="100%"
+                  symbol={expandedCard.symbol}
+                  isTransparent={true}
+                ></MiniChart>
                 <p>{cards.find((c) => c.id === expandedCardId)?.todo}</p>
                 <p
                   style={{ color: "#888", fontSize: "14px", marginTop: "1rem" }}
@@ -510,7 +519,9 @@ const Overview = () => {
                 </p>
               </motion.div>
             </motion.div>
-          )}
+            );
+          })()}
+
         </AnimatePresence>
       </div>
     </div>

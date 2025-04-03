@@ -143,9 +143,19 @@ export default function Sim() {
     fetchnlv();
   }, []);
 
+  
+
+
   return (
-    <>
-      <h1>Paper Trading</h1>
+    <div
+      style={{
+        background:
+          "linear-gradient(to top right,rgb(227,204,241),rgb(197,218,236))",
+        padding: "2rem",
+        minHeight: "100vh",
+      }}
+    >
+      <h1 style={{ fontSize: "48px", fontWeight: "bold", color: "black" }}>Paper Trading</h1>
       <Row gutter={16} style={{ padding: 24, }}>
         <Col span={6}>
           <Form  onFinish={onFinish}>
@@ -288,7 +298,7 @@ export default function Sim() {
           <div
             style={{
               height: "120px",
-              backgroundColor: "lightblue",
+              istransparent: "true",
               display: "flex",
               flexWrap: "wrap",
             }}
@@ -303,7 +313,7 @@ export default function Sim() {
             </div>
 
             <div
-              style={{ height: "60px", width: "50%", backgroundColor: "green" }}
+              style={{ height: "60px", width: "50%",istransparent: "true", }}
             >
               <Statistic
                 style={{ marginLeft: "38%", fontWeight: "bold" }}
@@ -312,14 +322,20 @@ export default function Sim() {
                 formatter={formatter}
               />
             </div>
-
+            
+            
             <div
-              style={{ height: "60px", width: "50%", backgroundColor: "blue" }}
+              style={{ height: "60px", width: "50%", istransparent:"true"}}
             >
               <Statistic
                 style={{ marginLeft: "38%", fontWeight: "bold" }}
                 title="Unrealized P/L"
-                value={urpl}
+                
+                value={-urpl}
+                valueStyle={{
+                  color: urpl >= 0 ? "green" : "red",
+
+                }}
                 formatter={formatter}
               />
             </div>
@@ -328,7 +344,7 @@ export default function Sim() {
               style={{
                 height: "60px",
                 width: "50%",
-                backgroundColor: "yellow",
+                istransparent: "true",
               }}
             >
               <Statistic
@@ -344,6 +360,6 @@ export default function Sim() {
           </div>
         </Col>
       </Row>
-    </>
+    </div>
   );
 }

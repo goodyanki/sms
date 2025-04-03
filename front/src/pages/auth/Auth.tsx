@@ -20,10 +20,15 @@ const App: React.FC = () => {
 
     const result = await response.json();
     if(response.ok){
-
-        localStorage.setItem("userid", result.user_id)
-        console.log("Success:", result)
-        navigate("/dashboard");
+        const userid = result.user_id.toString()
+        console.log(userid);
+        localStorage.setItem("userid", userid.toString());
+        localStorage.setItem("test", result.user_id)
+        console.log(localStorage.getItem("test"));
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 100);
+        localStorage.setItem("userid", userid)
     }
     else{
         console.log("Error:", result)

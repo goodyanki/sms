@@ -17,7 +17,7 @@ export default function App() {
 
         <Route path="/auth" element={<Auth />} />
         <Route path="/register" element={<RegisterForm />} />
-
+        
         <Route path="/dashboard" element={<AppLayout />}>
           <Route index element={<Overview />} />
           <Route path="watch-list" element={<WatchList />} />

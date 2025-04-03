@@ -10,15 +10,26 @@ import {
   SunOutlined,
   MoonOutlined,
   StockOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
-import { Button, Layout, Menu, theme, ConfigProvider } from "antd";
+import { Button, Layout, Menu, theme, ConfigProvider, Affix } from "antd";
 import { TickerTape } from "react-ts-tradingview-widgets";
+import ReactCanvasNest from 'react-canvas-nest';
+
+
+
+function logout(): void {
+  localStorage.removeItem("userid");
+}
+
+
 
 const { Header, Sider, Content } = Layout;
 
 const App: React.FC = () => {
   const [collapsed, setCollapsed] = useState(true);
   const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
+  const [bottom, setBottom] = React.useState<number>(100);
 
   return (
     <ConfigProvider
@@ -41,6 +52,7 @@ const App: React.FC = () => {
           collapsible
           collapsed={collapsed}
           theme={themeMode}
+          style={{ position: "relative" }}
         >
           <div className="logo-container">
             <img src="/unicorn.svg" alt="Unicorn Logo" className="logo" />
@@ -78,6 +90,11 @@ const App: React.FC = () => {
               }
             ]}
           />
+          <div style={{marginLeft:"15px", marginTop:"550px"}}>
+            <Button href="/auth" type="primary" style={{ marginLeft: "auto", position:"fixed" }} onClick={logout}>
+              <LogoutOutlined />
+            </Button>
+          </div>
         </Sider>
         <Layout
           style={{
@@ -85,6 +102,7 @@ const App: React.FC = () => {
             flex: 1,
             display: "flex",
             flexDirection: "column",
+
           }}
         >
           <Header
@@ -147,6 +165,8 @@ const App: React.FC = () => {
               overflow: "auto",
             }}
           >
+            
+
             <Outlet />
           </Content>
         </Layout>

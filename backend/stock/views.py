@@ -9,8 +9,11 @@ from rest_framework.decorators import api_view
 import uuid
 import time
 from django.core.mail import send_mail
+import requests
+from bs4 import BeautifulSoup
 
-
+#finviz ref: https://xang1234.github.io/scrapingfinviz/
+#finviz ref2: https://stackoverflow.com/questions/65144816/beautifulsoup-finviz
 
 #documentation: https://yfinance-python.org/index.html
 
@@ -27,7 +30,68 @@ def get_stock_current_price(symbol):
     return data['Close'].iloc[-1]
 
 
-#def get_hk_curreent_price(symbol):
+
+@api_view(['GET'])
+def get_top3_gainers(request):
+    url = "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved"
+    params = {
+        'scrIds': 'day_gainers',
+        'count': 25
+    }
+    headers = {
+        'User-Agent': 'Mozilla/5.0'
+    }
+
+    response = requests.get(url, params=params, headers=headers)
+    data = response.json()
+
+    result = []
+
+    if 'quotes' in data['finance']['result'][0]:
+        quotes = data['finance']['result'][0]['quotes']
+        sorted_quotes = sorted(quotes, key=lambda x: x.get('regularMarketChangePercent', 0.0), reverse=True)
+        top5 = sorted_quotes[:3]
+
+        for stock in top5:
+            result.append({
+                'symbol': stock.get('symbol', 'N/A'),
+                'short_name': stock.get('shortName', 'N/A'),
+                'change_percent': round(stock.get('regularMarketChangePercent', 0.0), 2)
+            })
+
+
+    return JsonResponse({'stock': result})
+
+    
+@api_view(['GET'])
+def get_weekly_trend(request):
+    
+    url = "https://finviz.com/screener.ashx?v=111&s=ta_topgainers&f=sh_avgvol_o100,sh_price_o5,ta_gain_week_up"
+    headers = {"User-Agent": "Mozilla/5.0"}
+
+    soup = BeautifulSoup(requests.get(url, headers=headers).text, 'html.parser')
+    rows = soup.select("tr[valign=top]") 
+    result = []
+    for row in rows:
+        cols = row.find_all("td")
+        if cols and len(cols) > 10:
+            ticker = cols[1].text.strip()
+            name = cols[2].text.strip()
+            country = cols[5].text.strip()
+
+        
+            gain_week_str = cols[-2].text.strip()
+            if country == "USA":
+                gain_week = float(gain_week_str.strip('%'))
+                result.append({
+                    "symbol": ticker,
+                    "short_name": name,
+                    "change_percent": gain_week 
+                })
+
+    return JsonResponse({'stock': result})
+
+        
 
 
 def get_stock_info(symbol):

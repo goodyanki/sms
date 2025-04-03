@@ -35,8 +35,15 @@ export default function Index() {
   const [selected, setSelected] = useState<string | null>(null);
 
   return (
-    <>
-      <h1>Technical Index Analysis</h1>
+    <div
+      style={{
+        background:
+          "linear-gradient(to top right,rgb(227,204,241),rgb(197,218,236))",
+        padding: "2rem",
+        minHeight: "100vh",
+      }}
+    >
+      <h1 style={{ fontSize: "48px", fontWeight: "bold", color: "black" }}>Technical Index Analysis</h1>
 
       <Row style={{ padding: 24 }}>
         <Col span={8}>
@@ -83,7 +90,6 @@ export default function Index() {
                         <Card
                           hoverable
                           style={{ borderRadius: 12, textAlign: "center" }}
-                          bodyStyle={{ fontSize: 18, fontWeight: "bold" }}
                         >
                           {indicator.title}
                         </Card>
@@ -101,6 +107,6 @@ export default function Index() {
           </div>
         </Col>
       </Row>
-    </>
+    </div>
   );
 }
