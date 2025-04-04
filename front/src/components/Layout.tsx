@@ -12,24 +12,18 @@ import {
   StockOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
-import { Button, Layout, Menu, theme, ConfigProvider, Affix } from "antd";
+import { Button, Layout, Menu, theme, ConfigProvider } from "antd";
 import { TickerTape } from "react-ts-tradingview-widgets";
-import ReactCanvasNest from 'react-canvas-nest';
-
-
 
 function logout(): void {
   localStorage.removeItem("userid");
 }
-
-
 
 const { Header, Sider, Content } = Layout;
 
 const App: React.FC = () => {
   const [collapsed, setCollapsed] = useState(true);
   const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
-  const [bottom, setBottom] = React.useState<number>(100);
 
   return (
     <ConfigProvider
@@ -50,7 +44,7 @@ const App: React.FC = () => {
         <Sider
           trigger={null}
           collapsible
-          collapsed={collapsed}
+          collapsed={true}
           theme={themeMode}
           style={{ position: "relative" }}
         >
@@ -76,7 +70,9 @@ const App: React.FC = () => {
               {
                 key: "3",
                 icon: <UploadOutlined />,
-                label: <Link to="/dashboard/technical-index">Technical Index</Link>,
+                label: (
+                  <Link to="/dashboard/technical-index">Technical Index</Link>
+                ),
               },
               {
                 key: "4",
@@ -85,13 +81,18 @@ const App: React.FC = () => {
               },
               {
                 key: "5",
-                icon:<StockOutlined />,
+                icon: <StockOutlined />,
                 label: <Link to="/dashboard/paper_trading">Paper_Trading</Link>,
-              }
+              },
             ]}
           />
-          <div style={{marginLeft:"15px", marginTop:"550px"}}>
-            <Button href="/auth" type="primary" style={{ marginLeft: "auto", position:"fixed" }} onClick={logout}>
+          <div style={{ marginLeft: "15px" }}>
+            <Button
+              href="/auth"
+              type="primary"
+              style={{ marginLeft: "auto", bottom: "24px", position: "fixed" }}
+              onClick={logout}
+            >
               <LogoutOutlined />
             </Button>
           </div>
@@ -102,7 +103,6 @@ const App: React.FC = () => {
             flex: 1,
             display: "flex",
             flexDirection: "column",
-
           }}
         >
           <Header
@@ -123,7 +123,8 @@ const App: React.FC = () => {
             }}
           >
             {/* btn_fold*/}
-            <Button
+
+            {/* <Button
               type="text"
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
               onClick={() => setCollapsed(!collapsed)}
@@ -132,7 +133,7 @@ const App: React.FC = () => {
                 width: 64,
                 height: 64,
               }}
-            />
+            /> */}
 
             <TickerTape colorTheme={themeMode} />
 
@@ -159,14 +160,13 @@ const App: React.FC = () => {
           <Content
             style={{
               padding: 24,
-              background: "linear-gradient(to top right,rgb(227, 204, 241),rgb(197, 218, 236))", 
+              background:
+                "linear-gradient(to top right,rgb(227, 204, 241),rgb(197, 218, 236))",
               borderRadius: 8,
               flex: 1,
               overflow: "auto",
             }}
           >
-            
-
             <Outlet />
           </Content>
         </Layout>
